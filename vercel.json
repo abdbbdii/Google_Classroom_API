@@ -5,7 +5,7 @@
             "src": "Google_Classroom_API/wsgi.py",
             "use": "@vercel/python",
             "config": {
-                "maxLambdaSize": "20mb",
+                "maxLambdaSize": "35mb",
                 "runtime": "python3.12"
             }
         }
