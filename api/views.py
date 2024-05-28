@@ -7,6 +7,5 @@ service = build("classroom", "v1", credentials=authenticate())
 
 
 def get(request):
-    if request.method == "GET":
-        notify_new_activity(service)
-        return JsonResponse({"message": "Notification sent successfully."})
+    notify_new_activity(service)
+    return JsonResponse({"message": "Notification sent successfully."})
