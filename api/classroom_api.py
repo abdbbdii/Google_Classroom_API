@@ -53,6 +53,14 @@ def send_request(item):
     )
     print("Response:", response.status_code, response.text)
 
+def parse_datetime(dt_str):
+    """
+    Parses a datetime string that may or may not include fractional seconds.
+    """
+    try:
+        return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
 
 def notify_new_activity(service):
     """
@@ -69,21 +77,21 @@ def notify_new_activity(service):
             print(f"Checking for new activity in course {course['name']}...")
             announcements = get_course_announcements(service, course["id"])
             for announcement in announcements:
-                announcement_time = datetime.strptime(announcement["updateTime"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+                announcement_time = parse_datetime(announcement["updateTime"])
                 if announcement_time > last_check:
                     print("New announcement found:", announcement)
                     send_request({"content": {"course": course, "activity": announcement, "type": "announcement"}})
 
             coursework = get_coursework(service, course["id"])
             for work in coursework:
-                work_time = datetime.strptime(work["updateTime"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+                work_time = parse_datetime(work["updateTime"])
                 if work_time > last_check:
                     print("New coursework found:", work)
                     send_request({"content": {"course": course, "activity": work, "type": "coursework"}})
 
             materials = get_materials(service, course["id"])
             for material in materials:
-                material_time = datetime.strptime(material["updateTime"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+                material_time = parse_datetime(material["updateTime"])
                 if material_time > last_check:
                     print("New material found:", material)
                     send_request({"content": {"course": course, "activity": material, "type": "material"}})
