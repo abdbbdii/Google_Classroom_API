@@ -103,4 +103,5 @@ def notify_new_activity(service):
     except Exception as e:
         print(f"An error occurred while checking for new activity: {e}")
 
-    set_key(dotenv_path, "LAST_CHECK", current_time.isoformat())
+    # set_key(dotenv_path, "LAST_CHECK", current_time.isoformat())
+    os.environ['LAST_CHECK'] = current_time.isoformat()
