@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv, find_dotenv, set_key
 
 dotenv_path = find_dotenv()
-if not dotenv_path:
-    raise FileNotFoundError("The .env file was not found.")
+# if not dotenv_path:
+#     raise FileNotFoundError("The .env file was not found.")
 load_dotenv(dotenv_path)
 
 SCOPES = [
