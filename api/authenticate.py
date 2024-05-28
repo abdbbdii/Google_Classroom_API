@@ -38,6 +38,7 @@ def authenticate():
             flow = InstalledAppFlow.from_client_config(json.loads(os.getenv("GOOGLE_CREDENTIALS")), SCOPES)
             creds = flow.run_local_server(port=0)
 
-        set_key(dotenv_path, "TOKEN_PICKLE_BASE64", base64.b64encode(pickle.dumps(creds)).decode("utf-8"))
+        # set_key(dotenv_path, "TOKEN_PICKLE_BASE64", base64.b64encode(pickle.dumps(creds)).decode("utf-8"))
+        os.environ['TOKEN_PICKLE_BASE64'] = base64.b64encode(pickle.dumps(creds)).decode("utf-8")
     print("Authenticated successfully!")
     return creds
