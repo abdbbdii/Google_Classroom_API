@@ -6,13 +6,7 @@ from dotenv import load_dotenv, find_dotenv, set_key
 import json
 import base64
 
-if not os.getenv('VERCEL_ENV'):
-    dotenv_path = find_dotenv()
-    if dotenv_path:
-        load_dotenv(dotenv_path)
-    else:
-        raise FileNotFoundError("The .env file was not found.")
-
+load_dotenv(find_dotenv()) if not os.getenv("VERCEL_ENV") else None
 
 SCOPES = [
     "https://www.googleapis.com/auth/classroom.courses.readonly",
@@ -20,6 +14,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/classroom.announcements.readonly",
     "https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly",
 ]
+
 
 def authenticate():
     """
@@ -38,7 +33,10 @@ def authenticate():
             flow = InstalledAppFlow.from_client_config(json.loads(os.getenv("GOOGLE_CREDENTIALS")), SCOPES)
             creds = flow.run_local_server(port=0)
 
-        # set_key(dotenv_path, "TOKEN_PICKLE_BASE64", base64.b64encode(pickle.dumps(creds)).decode("utf-8"))
-        os.environ['TOKEN_PICKLE_BASE64'] = base64.b64encode(pickle.dumps(creds)).decode("utf-8")
+        if os.getenv('VERCEL_ENV'):
+            os.environ["TOKEN_PICKLE_BASE64"] = base64.b64encode(pickle.dumps(creds)).decode("utf-8")
+        else:
+            set_key(find_dotenv(), "TOKEN_PICKLE_BASE64", base64.b64encode(pickle.dumps(creds)).decode("utf-8"))
+
     print("Authenticated successfully!")
     return creds

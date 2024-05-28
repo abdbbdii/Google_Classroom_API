@@ -14,12 +14,7 @@ from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 import os
 
-if not os.getenv('VERCEL_ENV'):
-    dotenv_path = find_dotenv()
-    if dotenv_path:
-        load_dotenv(dotenv_path)
-    else:
-        raise FileNotFoundError("The .env file was not found.")
+load_dotenv(find_dotenv()) if not os.getenv('VERCEL_ENV') else None
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

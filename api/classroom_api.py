@@ -3,19 +3,7 @@ import requests
 from datetime import datetime, timezone
 from dotenv import load_dotenv, find_dotenv, set_key
 
-if not os.getenv('VERCEL_ENV'):
-    dotenv_path = find_dotenv()
-    if dotenv_path:
-        load_dotenv(dotenv_path)
-    else:
-        raise FileNotFoundError("The .env file was not found.")
-
-SCOPES = [
-    "https://www.googleapis.com/auth/classroom.courses.readonly",
-    "https://www.googleapis.com/auth/classroom.student-submissions.me.readonly",
-    "https://www.googleapis.com/auth/classroom.announcements.readonly",
-    "https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly",
-]
+load_dotenv(find_dotenv()) if not os.getenv("VERCEL_ENV") else None
 
 
 def get_course_announcements(service, course_id):
@@ -103,5 +91,7 @@ def notify_new_activity(service):
     except Exception as e:
         print(f"An error occurred while checking for new activity: {e}")
 
-    # set_key(dotenv_path, "LAST_CHECK", current_time.isoformat())
-    os.environ['LAST_CHECK'] = current_time.isoformat()
+    if os.getenv("VERCEL_ENV"):
+        os.environ["LAST_CHECK"] = current_time.isoformat()
+    else:
+        set_key(find_dotenv(), "LAST_CHECK", current_time.isoformat())
