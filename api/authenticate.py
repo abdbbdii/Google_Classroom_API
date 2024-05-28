@@ -6,7 +6,7 @@ from dotenv import load_dotenv, find_dotenv, set_key
 import json
 import base64
 
-load_dotenv()
+load_dotenv(find_dotenv())
 
 SCOPES = [
     "https://www.googleapis.com/auth/classroom.courses.readonly",
