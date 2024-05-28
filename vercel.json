@@ -1,0 +1,19 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "Google_Classroom_API/wsgi.py",
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "20mb",
+                "runtime": "python3.12"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "Google_Classroom_API/wsgi.py"
+        }
+    ]
+}
