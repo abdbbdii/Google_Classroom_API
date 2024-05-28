@@ -3,7 +3,10 @@ import requests
 from datetime import datetime, timezone
 from dotenv import load_dotenv, find_dotenv, set_key
 
-load_dotenv('.env')
+dotenv_path = find_dotenv()
+if not dotenv_path:
+    raise FileNotFoundError("The .env file was not found.")
+load_dotenv(dotenv_path)
 
 SCOPES = [
     "https://www.googleapis.com/auth/classroom.courses.readonly",
@@ -98,4 +101,4 @@ def notify_new_activity(service):
     except Exception as e:
         print(f"An error occurred while checking for new activity: {e}")
 
-    set_key('.env', "LAST_CHECK", current_time.isoformat())
+    set_key(dotenv_path, "LAST_CHECK", current_time.isoformat())
