@@ -3,7 +3,7 @@ import requests
 from datetime import datetime, timezone
 from dotenv import load_dotenv, find_dotenv, set_key
 
-load_dotenv()
+load_dotenv(find_dotenv())
 
 SCOPES = [
     "https://www.googleapis.com/auth/classroom.courses.readonly",
