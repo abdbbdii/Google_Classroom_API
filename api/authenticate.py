@@ -6,7 +6,12 @@ from dotenv import load_dotenv, find_dotenv, set_key
 import json
 import base64
 
-load_dotenv(find_dotenv())
+dotenv_path = find_dotenv()
+print(dotenv_path)
+if not dotenv_path:
+    raise FileNotFoundError("The .env file was not found.")
+load_dotenv(dotenv_path)
+
 
 SCOPES = [
     "https://www.googleapis.com/auth/classroom.courses.readonly",
@@ -25,12 +30,13 @@ def authenticate():
         creds = pickle.loads(base64.b64decode(token))
 
     if not creds or not creds.valid:
+        print("Authenticating...")
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_config(json.loads(os.getenv("GOOGLE_CREDENTIALS")), SCOPES)
             creds = flow.run_local_server(port=0)
 
-        set_key(find_dotenv(), "TOKEN_PICKLE_BASE64", base64.b64encode(pickle.dumps(creds)).decode("utf-8"))
+        set_key(dotenv_path, "TOKEN_PICKLE_BASE64", base64.b64encode(pickle.dumps(creds)).decode("utf-8"))
     print("Authenticated successfully!")
     return creds
