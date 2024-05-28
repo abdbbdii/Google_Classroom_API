@@ -3,10 +3,12 @@ import requests
 from datetime import datetime, timezone
 from dotenv import load_dotenv, find_dotenv, set_key
 
-dotenv_path = find_dotenv()
-if not dotenv_path:
-    raise FileNotFoundError("The .env file was not found.")
-load_dotenv(dotenv_path)
+if not os.getenv('VERCEL_ENV'):
+    dotenv_path = find_dotenv()
+    if dotenv_path:
+        load_dotenv(dotenv_path)
+    else:
+        raise FileNotFoundError("The .env file was not found.")
 
 SCOPES = [
     "https://www.googleapis.com/auth/classroom.courses.readonly",
