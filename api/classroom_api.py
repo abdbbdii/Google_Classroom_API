@@ -66,8 +66,9 @@ def notify_new_activity(service):
     Checks for new activities (announcements, coursework, materials) in the courses and notifies through a webhook.
     """
 
-    appSettings.last_check = datetime.fromisoformat(appSettings.last_check).replace(tzinfo=timezone.utc) if appSettings.last_check is not None else datetime.now(timezone.utc)
+    last_check = appSettings.last_check = datetime.fromisoformat(appSettings.last_check).replace(tzinfo=timezone.utc) if appSettings.last_check is not None else datetime.now(timezone.utc)
     current_time = datetime.now(timezone.utc)
+    appSettings.update("last_check", current_time.isoformat())
 
     try:
         courses = service.courses().list().execute().get("courses", [])
@@ -76,25 +77,24 @@ def notify_new_activity(service):
             announcements = get_course_announcements(service, course["id"])
             for announcement in announcements:
                 announcement_time = parse_datetime(announcement["updateTime"])
-                if announcement_time > appSettings.last_check:
+                if announcement_time > last_check:
                     print("New announcement found:", announcement)
                     send_request({"content": {"course": course, "activity": announcement, "type": "announcement"}})
 
             coursework = get_coursework(service, course["id"])
             for work in coursework:
                 work_time = parse_datetime(work["updateTime"])
-                if work_time > appSettings.last_check:
+                if work_time > last_check:
                     print("New coursework found:", work)
                     send_request({"content": {"course": course, "activity": work, "type": "coursework"}})
 
             materials = get_materials(service, course["id"])
             for material in materials:
                 material_time = parse_datetime(material["updateTime"])
-                if material_time > appSettings.last_check:
+                if material_time > last_check:
                     print("New material found:", material)
                     send_request({"content": {"course": course, "activity": material, "type": "material"}})
 
     except Exception as e:
         print(f"An error occurred while checking for new activity: {e}")
 
-    appSettings.update("last_check", current_time.isoformat())

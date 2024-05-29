@@ -43,8 +43,6 @@ last_check: {self.last_check}"""
     def update(self, key, value):
         setattr(self, key, value)
         settings = Settings.objects.first()
-        if isinstance(getattr(settings, key), list):
-            value = ",".join(value)
         setattr(settings, key, value)
         settings.save()
 
