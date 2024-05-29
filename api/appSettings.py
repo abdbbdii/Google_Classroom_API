@@ -9,7 +9,12 @@ load_dotenv(find_dotenv()) if not os.getenv("VERCEL_ENV") else None
 class AppSettings:
     def __init__(self) -> None:
         settings_values = {}
-        settings = Settings.objects.first()
+
+        try:
+            settings = Settings.objects.first()
+        except Exception as e:
+            print(e)
+            settings = None
 
         if not settings:
             settings = Settings()
@@ -47,11 +52,17 @@ last_check: {self.last_check}"""
         for field in self.__dict__:
             setattr(self, field, "")
         settings = Settings.objects.first()
-        print(list(settings._meta.fields))
         for field in settings._meta.fields:
             if field.name != "id":
                 setattr(settings, field.name, "")
         settings.save()
 
+
+# class AppSettings:
+#     def __init__(self) -> None:
+#         self.webhook_url = ""
+#         self.google_credentials = ""
+#         self.token_pickle_base64 = ""
+#         self.last_check = ""
 
 appSettings = AppSettings()
