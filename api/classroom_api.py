@@ -1,9 +1,6 @@
-import os
 import requests
 from datetime import datetime, timezone
-from dotenv import load_dotenv, find_dotenv, set_key
-
-load_dotenv(find_dotenv()) if not os.getenv("VERCEL_ENV") else None
+from .appSettings import appSettings
 
 
 def get_course_announcements(service, course_id):
@@ -47,11 +44,12 @@ def send_request(item):
     Sends a request to a specified webhook URL.
     """
     response = requests.post(
-        os.getenv("WEBHOOK_URL"),
+        appSettings.webhook_url,
         headers={"Content-Type": "application/json"},
         json=item,
     )
     print("Response:", response.status_code, response.text)
+
 
 def parse_datetime(dt_str):
     """
@@ -62,13 +60,13 @@ def parse_datetime(dt_str):
     except ValueError:
         return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
 
+
 def notify_new_activity(service):
     """
     Checks for new activities (announcements, coursework, materials) in the courses and notifies through a webhook.
     """
 
-    last_check = os.getenv("LAST_CHECK")
-    last_check = datetime.fromisoformat(last_check).replace(tzinfo=timezone.utc) if last_check is not None else datetime.now(timezone.utc)
+    appSettings.last_check = datetime.fromisoformat(appSettings.last_check).replace(tzinfo=timezone.utc) if appSettings.last_check is not None else datetime.now(timezone.utc)
     current_time = datetime.now(timezone.utc)
 
     try:
@@ -78,28 +76,25 @@ def notify_new_activity(service):
             announcements = get_course_announcements(service, course["id"])
             for announcement in announcements:
                 announcement_time = parse_datetime(announcement["updateTime"])
-                if announcement_time > last_check:
+                if announcement_time > appSettings.last_check:
                     print("New announcement found:", announcement)
                     send_request({"content": {"course": course, "activity": announcement, "type": "announcement"}})
 
             coursework = get_coursework(service, course["id"])
             for work in coursework:
                 work_time = parse_datetime(work["updateTime"])
-                if work_time > last_check:
+                if work_time > appSettings.last_check:
                     print("New coursework found:", work)
                     send_request({"content": {"course": course, "activity": work, "type": "coursework"}})
 
             materials = get_materials(service, course["id"])
             for material in materials:
                 material_time = parse_datetime(material["updateTime"])
-                if material_time > last_check:
+                if material_time > appSettings.last_check:
                     print("New material found:", material)
                     send_request({"content": {"course": course, "activity": material, "type": "material"}})
 
     except Exception as e:
         print(f"An error occurred while checking for new activity: {e}")
 
-    if os.getenv("VERCEL_ENV"):
-        os.environ["LAST_CHECK"] = current_time.isoformat()
-    else:
-        set_key(find_dotenv(), "LAST_CHECK", current_time.isoformat())
+    appSettings.update("last_check", current_time.isoformat())

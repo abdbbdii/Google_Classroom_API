@@ -1,12 +1,9 @@
-import os
 import pickle
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-from dotenv import load_dotenv, find_dotenv, set_key
 import json
 import base64
-
-load_dotenv(find_dotenv()) if not os.getenv("VERCEL_ENV") else None
+from .appSettings import appSettings
 
 SCOPES = [
     "https://www.googleapis.com/auth/classroom.courses.readonly",
@@ -20,23 +17,22 @@ def authenticate():
     """
     Authenticates the user using OAuth2 credentials and returns the credentials object.
     """
+    if not appSettings.google_credentials:
+        raise ValueError("Google credentials not found in the database.")
+    print("Authenticating...")
     creds = None
 
-    if token := os.getenv("TOKEN_PICKLE_BASE64"):
+    if token := appSettings.token_pickle_base64:
         creds = pickle.loads(base64.b64decode(token))
 
     if not creds or not creds.valid:
-        print("Authenticating...")
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_config(json.loads(os.getenv("GOOGLE_CREDENTIALS")), SCOPES)
+            flow = InstalledAppFlow.from_client_config(json.loads(appSettings.google_credentials), SCOPES)
             creds = flow.run_local_server(port=0)
 
-        if os.getenv('VERCEL_ENV'):
-            os.environ["TOKEN_PICKLE_BASE64"] = base64.b64encode(pickle.dumps(creds)).decode("utf-8")
-        else:
-            set_key(find_dotenv(), "TOKEN_PICKLE_BASE64", base64.b64encode(pickle.dumps(creds)).decode("utf-8"))
+        appSettings.update("token_pickle_base64", base64.b64encode(pickle.dumps(creds)).decode("utf-8"))
 
     print("Authenticated successfully!")
     return creds
