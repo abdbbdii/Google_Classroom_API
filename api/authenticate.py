@@ -1,8 +1,11 @@
-import pickle
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 import json
+import pickle
+
 import base64
+import google.auth.exceptions
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+
 from .appSettings import appSettings
 
 SCOPES = [
@@ -19,20 +22,37 @@ def authenticate():
     """
     if not appSettings.google_credentials:
         raise ValueError("Google credentials not found in the database.")
-    print("Authenticating...")
+
+    print("Checking stored credentials...")
     creds = None
 
+    # Retrieve stored token if available
     if token := appSettings.token_pickle_base64:
-        creds = pickle.loads(base64.b64decode(token))
+        try:
+            creds = pickle.loads(base64.b64decode(token))
+        except Exception as e:
+            print(f"Failed to load credentials: {e}")
+            creds = None
 
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
+    # Check if the credentials are valid and refresh if needed
+    if creds and creds.valid:
+        print("Using stored credentials.")
+    elif creds and creds.expired and creds.refresh_token:
+        try:
+            print("Refreshing access token...")
             creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_config(json.loads(appSettings.google_credentials), SCOPES)
-            creds = flow.run_local_server(port=0)
+            appSettings.update("token_pickle_base64", base64.b64encode(pickle.dumps(creds)).decode("utf-8"))
+            print("Token refreshed successfully.")
+        except google.auth.exceptions.RefreshError:
+            print("Token refresh failed. Starting new authentication flow...")
+            creds = None
 
+    # If no valid credentials, authenticate via Google
+    if not creds or not creds.valid:
+        print("Authenticating with Google...")
+        flow = InstalledAppFlow.from_client_config(json.loads(appSettings.google_credentials), SCOPES)
+        creds = flow.run_local_server(port=0)
         appSettings.update("token_pickle_base64", base64.b64encode(pickle.dumps(creds)).decode("utf-8"))
+        print("Authenticated and token stored successfully.")
 
-    print("Authenticated successfully!")
     return creds
