@@ -39,10 +39,16 @@ def get_materials(service, course_id):
         return []
 
 
-def send_request(item):
+def send_request(item, service):
     """
     Sends a request to a specified webhook URL.
     """
+    try:
+        profile = service.userProfiles().get(userId=item["course"]["ownerId"]).execute()
+        owner_name = profile.get('name', {}).get('fullName')
+    except Exception as e:
+        owner_name = None
+    item["course"]["ownerName"] = owner_name
     response = requests.post(
         appSettings.webhook_url,
         headers={"Content-Type": "application/json"},
