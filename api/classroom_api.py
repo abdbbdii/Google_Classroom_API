@@ -85,21 +85,21 @@ def notify_new_activity(service):
                 announcement_time = parse_datetime(announcement["updateTime"])
                 if announcement_time > last_check:
                     print("New announcement found:", announcement)
-                    send_request({"content": {"course": course, "activity": announcement, "type": "announcement"}})
+                    send_request({"content": {"course": course, "activity": announcement, "type": "announcement"}}, service)
 
             coursework = get_coursework(service, course["id"])
             for work in coursework:
                 work_time = parse_datetime(work["updateTime"])
                 if work_time > last_check:
                     print("New coursework found:", work)
-                    send_request({"content": {"course": course, "activity": work, "type": "coursework"}})
+                    send_request({"content": {"course": course, "activity": work, "type": "coursework"}}, service)
 
             materials = get_materials(service, course["id"])
             for material in materials:
                 material_time = parse_datetime(material["updateTime"])
                 if material_time > last_check:
                     print("New material found:", material)
-                    send_request({"content": {"course": course, "activity": material, "type": "material"}})
+                    send_request({"content": {"course": course, "activity": material, "type": "material"}}, service)
 
     except Exception as e:
         print(f"An error occurred while checking for new activity: {e}")
