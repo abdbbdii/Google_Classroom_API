@@ -1,3 +1,6 @@
+import pickle
+import base64
+
 from django.http import JsonResponse
 from .classroom_api import notify_new_activity
 from googleapiclient.discovery import build
@@ -23,9 +26,11 @@ def get(request):
     )
     if r.status_code != 200:
         return JsonResponse({"error": "Failed to authenticate with Google."}, status=500)
-    appSettings.update("google_creds", json.loads(r.json().get("google_creds")))
+        
+    if r.json().get("token_pickle_base64") != appSettings.token_pickle_base64:
+        appSettings.update("token_pickle_base64", json.loads(r.json().get("token_pickle_base64")))
 
-    service = build("classroom", "v1", credentials=appSettings.google_creds)
+    service = build("classroom", "v1", credentials=pickle.loads(base64.b64decode(appSettings.token_pickle_base64)))
     notify_new_activity(service)
 
     return JsonResponse({"message": "Notification sent successfully."})
