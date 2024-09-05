@@ -31,9 +31,9 @@ def get_materials(service, course_id):
 
 
 def send_request(item, service):
-    profile = service.userProfiles().get(userId=item["course"]["ownerId"]).execute()
-    owner_name = profile.get("name", {}).get("fullName")
-    item["course"]["ownerName"] = owner_name
+    # profile = service.userProfiles().get(userId=item["course"]["ownerId"]).execute()
+    # owner_name = profile.get("name", {}).get("fullName")
+    # item["course"]["ownerName"] = owner_name
 
     print("Sending request:", item)
     response = requests.post(
