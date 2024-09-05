@@ -56,30 +56,26 @@ def notify_new_activity(service):
     current_time = datetime.now(timezone.utc)
     appSettings.update("last_check", current_time.isoformat())
 
-    try:
-        courses = service.courses().list().execute().get("courses", [])
-        for course in courses:
-            print(f"Checking for new activity in course {course['name']}...")
-            announcements = get_course_announcements(service, course["id"])
-            for announcement in announcements:
-                announcement_time = parse_datetime(announcement["updateTime"])
-                if announcement_time > last_check:
-                    print("New announcement found")
-                    send_request({"content": {"course": course, "activity": announcement, "type": "announcement"}}, service)
+    courses = service.courses().list().execute().get("courses", [])
+    for course in courses:
+        print(f"Checking for new activity in course {course['name']}...")
+        announcements = get_course_announcements(service, course["id"])
+        for announcement in announcements:
+            announcement_time = parse_datetime(announcement["updateTime"])
+            if announcement_time > last_check:
+                print("New announcement found")
+                send_request({"content": {"course": course, "activity": announcement, "type": "announcement"}}, service)
 
-            coursework = get_coursework(service, course["id"])
-            for work in coursework:
-                work_time = parse_datetime(work["updateTime"])
-                if work_time > last_check:
-                    print("New coursework found")
-                    send_request({"content": {"course": course, "activity": work, "type": "coursework"}}, service)
+        coursework = get_coursework(service, course["id"])
+        for work in coursework:
+            work_time = parse_datetime(work["updateTime"])
+            if work_time > last_check:
+                print("New coursework found")
+                send_request({"content": {"course": course, "activity": work, "type": "coursework"}}, service)
 
-            materials = get_materials(service, course["id"])
-            for material in materials:
-                material_time = parse_datetime(material["updateTime"])
-                if material_time > last_check:
-                    print("New material found")
-                    send_request({"content": {"course": course, "activity": material, "type": "material"}}, service)
-
-    except Exception as e:
-        print(f"An error occurred while checking for new activity: {e.with_traceback()}")
+        materials = get_materials(service, course["id"])
+        for material in materials:
+            material_time = parse_datetime(material["updateTime"])
+            if material_time > last_check:
+                print("New material found")
+                send_request({"content": {"course": course, "activity": material, "type": "material"}}, service)
