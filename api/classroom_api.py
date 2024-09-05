@@ -31,12 +31,10 @@ def get_materials(service, course_id):
 
 
 def send_request(item, service):
-    try:
-        profile = service.userProfiles().get(userId=item["course"]["ownerId"]).execute()
-        owner_name = profile.get("name", {}).get("fullName")
-    except Exception as e:
-        owner_name = None
+    profile = service.userProfiles().get(userId=item["course"]["ownerId"]).execute()
+    owner_name = profile.get("name", {}).get("fullName")
     item["course"]["ownerName"] = owner_name
+
     print("Sending request:", item)
     response = requests.post(
         appSettings.webhook_url,
@@ -84,4 +82,4 @@ def notify_new_activity(service):
                     send_request({"content": {"course": course, "activity": material, "type": "material"}}, service)
 
     except Exception as e:
-        print(f"An error occurred while checking for new activity: {e}")
+        print(f"An error occurred while checking for new activity: {e.with_traceback()}")
