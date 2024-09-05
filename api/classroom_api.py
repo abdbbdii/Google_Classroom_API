@@ -45,7 +45,7 @@ def send_request(item, service):
     """
     try:
         profile = service.userProfiles().get(userId=item["course"]["ownerId"]).execute()
-        owner_name = profile.get('name', {}).get('fullName')
+        owner_name = profile.get("name", {}).get("fullName")
     except Exception as e:
         owner_name = None
     item["course"]["ownerName"] = owner_name
@@ -103,4 +103,3 @@ def notify_new_activity(service):
 
     except Exception as e:
         print(f"An error occurred while checking for new activity: {e}")
-
