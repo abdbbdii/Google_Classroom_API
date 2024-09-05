@@ -4,9 +4,6 @@ from .appSettings import appSettings
 
 
 def get_course_announcements(service, course_id):
-    """
-    Fetches announcements for a given course.
-    """
     try:
         announcements = service.courses().announcements().list(courseId=course_id).execute()
         return announcements.get("announcements", [])
@@ -16,9 +13,6 @@ def get_course_announcements(service, course_id):
 
 
 def get_coursework(service, course_id):
-    """
-    Fetches coursework for a given course.
-    """
     try:
         coursework = service.courses().courseWork().list(courseId=course_id).execute()
         return coursework.get("courseWork", [])
@@ -28,9 +22,6 @@ def get_coursework(service, course_id):
 
 
 def get_materials(service, course_id):
-    """
-    Fetches materials for a given course.
-    """
     try:
         materials = service.courses().courseWorkMaterials().list(courseId=course_id).execute()
         return materials.get("courseWorkMaterial", [])
@@ -40,9 +31,6 @@ def get_materials(service, course_id):
 
 
 def send_request(item, service):
-    """
-    Sends a request to a specified webhook URL.
-    """
     try:
         profile = service.userProfiles().get(userId=item["course"]["ownerId"]).execute()
         owner_name = profile.get("name", {}).get("fullName")
@@ -58,9 +46,6 @@ def send_request(item, service):
 
 
 def parse_datetime(dt_str):
-    """
-    Parses a datetime string that may or may not include fractional seconds.
-    """
     try:
         return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
     except ValueError:
@@ -68,10 +53,6 @@ def parse_datetime(dt_str):
 
 
 def notify_new_activity(service):
-    """
-    Checks for new activities (announcements, coursework, materials) in the courses and notifies through a webhook.
-    """
-
     last_check = appSettings.last_check = datetime.fromisoformat(appSettings.last_check).replace(tzinfo=timezone.utc) if appSettings.last_check is not None else datetime.now(timezone.utc)
     current_time = datetime.now(timezone.utc)
     appSettings.update("last_check", current_time.isoformat())
