@@ -1,5 +1,6 @@
 import pickle
 import base64
+import traceback
 
 from django.http import JsonResponse
 from .classroom_api import notify_new_activity
@@ -38,4 +39,4 @@ def get(request):
         return JsonResponse({"message": "Notification sent successfully."})
 
     except Exception as e:
-        return JsonResponse({"error": str(e.with_traceback())}, status=500)
+        return JsonResponse({"message": str(traceback.format_exc())}, status=500)
