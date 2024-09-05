@@ -9,7 +9,7 @@ import json
 
 def get(request):
     r = requests.get(
-        appSettings.utils_server + "service/google_auth/",
+        appSettings.utils_server_url + "service/google_auth/",
         json={
             "password": appSettings.utils_server_password,
             "scopes": [
