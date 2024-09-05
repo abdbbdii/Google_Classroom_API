@@ -26,7 +26,7 @@ def get(request):
     )
 
     if r.status_code != 200:
-        return JsonResponse({"error": "Failed to authenticate with Google."}, status=500)
+        return JsonResponse({"error": r.json().get("message")}, status=500)
 
     if r.json().get("token_pickle_base64") != appSettings.token_pickle_base64:
         appSettings.update("token_pickle_base64", json.loads(r.json().get("token_pickle_base64")))
