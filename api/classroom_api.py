@@ -64,18 +64,18 @@ def notify_new_activity(service):
             announcement_time = parse_datetime(announcement["updateTime"])
             if announcement_time > last_check:
                 print("New announcement found")
-                send_request({"content": {"course": course, "activity": announcement, "type": "announcement"}}, service)
+                send_request({"course": course, "activity": announcement, "type": "announcement"}, service)
 
         coursework = get_coursework(service, course["id"])
         for work in coursework:
             work_time = parse_datetime(work["updateTime"])
             if work_time > last_check:
                 print("New coursework found")
-                send_request({"content": {"course": course, "activity": work, "type": "coursework"}}, service)
+                send_request({"course": course, "activity": work, "type": "coursework"}, service)
 
         materials = get_materials(service, course["id"])
         for material in materials:
             material_time = parse_datetime(material["updateTime"])
             if material_time > last_check:
                 print("New material found")
-                send_request({"content": {"course": course, "activity": material, "type": "material"}}, service)
+                send_request({"course": course, "activity": material, "type": "material"}, service)
