@@ -30,7 +30,7 @@ class AppSettings:
         settings.save()
 
         self.webhook_url = settings.webhook_url_test if django_settings.DEBUG else settings.webhook_url
-        self.google_creds = settings.google_credentials
+        self.google_creds = settings.google_creds
         self.last_check = settings.last_check
         self.utils_server_url = settings.utils_server_url
         self.utils_server_password = settings.utils_server_password
