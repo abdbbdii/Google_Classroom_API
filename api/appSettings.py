@@ -30,7 +30,7 @@ class AppSettings:
         settings.save()
 
         self.webhook_url = settings.webhook_url_test if django_settings.DEBUG else settings.webhook_url
-        self.google_creds = settings.google_creds
+        self.token_pickle_base64 = settings.token_pickle_base64
         self.last_check = settings.last_check
         self.utils_server_url = settings.utils_server_url
         self.utils_server_password = settings.utils_server_password
@@ -90,7 +90,7 @@ except ProgrammingError:
     class AppSettings:
         def __init__(self) -> None:
             self.webhook_url = ""
-            self.google_creds = ""
+            self.token_pickle_base64 = ""
             self.last_check = ""
             self.utils_server_url = ""
             self.utils_server_password = ""

@@ -8,11 +8,11 @@ import json
 
 
 def get(request):
-    print(f"{appSettings.utils_server_url=}+service/google_auth/")
     r = requests.get(
         appSettings.utils_server_url + "service/google_auth/",
         json={
             "password": appSettings.utils_server_password,
+            "token_pickle_base64": appSettings.token_pickle_base64,
             "scopes": [
                 "https://www.googleapis.com/auth/classroom.courses.readonly",
                 "https://www.googleapis.com/auth/classroom.student-submissions.me.readonly",
