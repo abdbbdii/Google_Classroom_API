@@ -8,6 +8,7 @@ import json
 
 
 def get(request):
+    print(f"{appSettings.utils_server_url=}+service/google_auth/")
     r = requests.get(
         appSettings.utils_server_url + "service/google_auth/",
         json={
