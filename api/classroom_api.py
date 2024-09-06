@@ -3,47 +3,6 @@ from datetime import datetime, timezone
 from .appSettings import appSettings
 
 
-def get_course_announcements(service, course_id):
-    try:
-        announcements = service.courses().announcements().list(courseId=course_id).execute()
-        return announcements.get("announcements", [])
-    except Exception as e:
-        print(f"An error occurred while fetching announcements for course {course_id}: {e}")
-        return []
-
-
-def get_coursework(service, course_id):
-    try:
-        coursework = service.courses().courseWork().list(courseId=course_id).execute()
-        return coursework.get("courseWork", [])
-    except Exception as e:
-        print(f"An error occurred while fetching coursework for course {course_id}: {e}")
-        return []
-
-
-def get_materials(service, course_id):
-    try:
-        materials = service.courses().courseWorkMaterials().list(courseId=course_id).execute()
-        return materials.get("courseWorkMaterial", [])
-    except Exception as e:
-        print(f"An error occurred while fetching materials for course {course_id}: {e}")
-        return []
-
-
-def send_request(item, service):
-    # profile = service.userProfiles().get(userId=item["course"]["ownerId"]).execute()
-    # owner_name = profile.get("name", {}).get("fullName")
-    # item["course"]["ownerName"] = owner_name
-
-    print("Sending request:", item)
-    response = requests.post(
-        appSettings.webhook_url,
-        headers={"Content-Type": "application/json"},
-        json=item,
-    )
-    print("Response:", response.status_code, response.text)
-
-
 def parse_datetime(dt_str):
     try:
         return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
@@ -51,31 +10,30 @@ def parse_datetime(dt_str):
         return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
 
 
+def get_new_item(service, course, item_type):
+    items = service.courses().courseWorkMaterials().list(courseId=course["id"]).execute()
+    for item in items.get(item_type, []):
+        item_time = parse_datetime(item["updateTime"])
+        if item_time > appSettings.last_check:
+            print(f"New {item} found")
+            # profile = service.userProfiles().get(userId=item["ownerId"]).execute()
+            # owner_name = profile.get("name", {}).get("fullName")
+            # item["ownerName"] = owner_name
+            response = requests.post(
+                appSettings.webhook_url,
+                headers={"Content-Type": "application/json"},
+                json={"course": course, "activity": item, "type": item_type},
+            )
+            print("Response:", response.status_code, response.text)
+
+
 def notify_new_activity(service):
-    last_check = appSettings.last_check = datetime.fromisoformat(appSettings.last_check).replace(tzinfo=timezone.utc) if appSettings.last_check is not None else datetime.now(timezone.utc)
-    current_time = datetime.now(timezone.utc)
-    appSettings.update("last_check", current_time.isoformat())
+    appSettings.last_check = datetime.fromisoformat(appSettings.last_check).replace(tzinfo=timezone.utc) if appSettings.last_check is not None else datetime.now(timezone.utc)
+    appSettings.update("last_check", datetime.now(timezone.utc).isoformat())
 
     courses = service.courses().list().execute().get("courses", [])
     for course in courses:
         print(f"Checking for new activity in course {course['name']}...")
-        announcements = get_course_announcements(service, course["id"])
-        for announcement in announcements:
-            announcement_time = parse_datetime(announcement["updateTime"])
-            if announcement_time > last_check:
-                print("New announcement found")
-                send_request({"course": course, "activity": announcement, "type": "announcement"}, service)
-
-        coursework = get_coursework(service, course["id"])
-        for work in coursework:
-            work_time = parse_datetime(work["updateTime"])
-            if work_time > last_check:
-                print("New coursework found")
-                send_request({"course": course, "activity": work, "type": "coursework"}, service)
-
-        materials = get_materials(service, course["id"])
-        for material in materials:
-            material_time = parse_datetime(material["updateTime"])
-            if material_time > last_check:
-                print("New material found")
-                send_request({"course": course, "activity": material, "type": "material"}, service)
+        get_new_item(service, course, "announcements")
+        get_new_item(service, course, "courseWork")
+        get_new_item(service, course, "courseWorkMaterial")
