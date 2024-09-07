@@ -11,13 +11,15 @@ def parse_datetime(dt_str):
 
 
 def get_new_item(service, course, item_type, last_check):
-    items = service.courses().courseWorkMaterials().list(courseId=course["id"]).execute()
+    if item_type == "announcements":
+        items = service.courses().announcements().list(courseId=course["id"]).execute()
+    elif item_type == "courseWork":
+        items = service.courses().courseWork().list(courseId=course["id"]).execute()
+    elif item_type == "courseWorkMaterial":
+        items = service.courses().courseWorkMaterials().list(courseId=course["id"]).execute()
     for item in items.get(item_type, []):
         if parse_datetime(item["updateTime"]) > last_check:
             print(f"New {item} found")
-            # profile = service.userProfiles().get(userId=item["ownerId"]).execute()
-            # owner_name = profile.get("name", {}).get("fullName")
-            # item["ownerName"] = owner_name
             response = requests.post(
                 appSettings.webhook_url,
                 headers={"Content-Type": "application/json"},
@@ -27,6 +29,7 @@ def get_new_item(service, course, item_type, last_check):
 
 
 def notify_new_activity(service):
+    print("Last check:", appSettings.last_check)
     last_check = datetime.fromisoformat(appSettings.last_check).replace(tzinfo=timezone.utc) if appSettings.last_check is not None else datetime.now(timezone.utc)
     appSettings.update("last_check", datetime.now(timezone.utc).isoformat())
 
