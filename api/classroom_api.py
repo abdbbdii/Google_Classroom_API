@@ -12,20 +12,24 @@ def parse_datetime(dt_str):
 
 def get_new_item(service, course, item_type, last_check):
     if item_type == "announcements":
-        items = service.courses().announcements().list(courseId=course["id"]).execute()
+        items = service.courses().announcements().list(courseId=course["id"], orderBy="updateTime desc").execute()
     elif item_type == "courseWork":
-        items = service.courses().courseWork().list(courseId=course["id"]).execute()
+        items = service.courses().courseWork().list(courseId=course["id"], orderBy="updateTime desc").execute()
     elif item_type == "courseWorkMaterial":
-        items = service.courses().courseWorkMaterials().list(courseId=course["id"]).execute()
+        items = service.courses().courseWorkMaterials().list(courseId=course["id"], orderBy="updateTime desc").execute()
+
     for item in items.get(item_type, []):
         if parse_datetime(item["updateTime"]) > last_check:
-            print(f"New {item} found")
+            print(f"New item found:")
+            print(item)
             response = requests.post(
                 appSettings.webhook_url,
                 headers={"Content-Type": "application/json"},
                 json={"course": course, "activity": item, "type": item_type},
             )
             print("Response:", response.status_code, response.text)
+        else:
+            break
 
 
 def notify_new_activity(service):
