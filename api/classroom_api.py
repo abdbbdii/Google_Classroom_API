@@ -22,11 +22,18 @@ def get_new_item(service, course, item_type, last_check):
         if parse_datetime(item["updateTime"]) > last_check:
             print(f"New item found:")
             print(item)
-            response = requests.post(
-                appSettings.webhook_url,
-                headers={"Content-Type": "application/json"},
-                json={"course": course, "activity": item, "type": item_type},
-            )
+            try:
+                response = requests.post(
+                    appSettings.webhook_url,
+                    headers={"Content-Type": "application/json"},
+                    json={"course": course, "activity": item, "type": item_type, "is_new": (parse_datetime(item["creationTime"]) - parse_datetime(item["updateTime"])).total_seconds() < 300},
+                )
+            except:
+                response = requests.post(
+                    appSettings.webhook_url,
+                    headers={"Content-Type": "application/json"},
+                    json={"course": course, "activity": item, "type": item_type, "new": True},
+                )
             print("Response:", response.status_code, response.text)
         else:
             break
