@@ -8,7 +8,6 @@ from googleapiclient.discovery import build
 
 import requests
 from .appSettings import appSettings
-import json
 
 
 def get(request):
