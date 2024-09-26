@@ -3,8 +3,8 @@ import base64
 import traceback
 
 import requests
-from django.http import JsonResponse
 from asgiref.sync import async_to_sync
+from django.http import JsonResponse
 from googleapiclient.discovery import build
 
 from .appSettings import appSettings
@@ -17,6 +17,7 @@ def get(request):
             service = build("classroom", "v1", credentials=pickle.loads(base64.b64decode(appSettings.token_pickle_base64)))
             async_to_sync(notify_new_activity)(service)
         except Exception as e:
+            return JsonResponse({"message": str(traceback.format_exc())})
             # r = requests.get(
             #     appSettings.utils_server_url + "service/google_auth/",
             #     json={
@@ -39,7 +40,6 @@ def get(request):
             # if r.json().get("token_pickle_base64") != appSettings.token_pickle_base64:
             #     appSettings.update("token_pickle_base64", r.json().get("token_pickle_base64"))
 
-            return JsonResponse({"message": str(traceback.format_exc())})
 
         return JsonResponse({"message": "Notification sent successfully."})
 
