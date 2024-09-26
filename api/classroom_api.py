@@ -66,17 +66,17 @@ def parse_datetime(dt_str):
 async def send_request(session, item_data):
     """Send data asynchronously to the webhook endpoint."""
     print("Sending Item Data:", item_data)
-    # try:
-    #     async with session.post(
-    #         appSettings.webhook_url,  # Webhook URL
-    #         headers={"Content-Type": "application/json"},
-    #         json=item_data
-    #     ) as response:
-    #         # Handle and print response status and content
-    #         print(f"Response Status: {response.status}, Content: {await response.text()}")
-    # except aiohttp.ClientError as e:
-    #     # Handle network or client errors
-    #     print(f"Error sending data: {e}")
+    try:
+        async with session.post(
+            appSettings.webhook_url,  # Webhook URL
+            headers={"Content-Type": "application/json"},
+            json=item_data
+        ) as response:
+            # Handle and print response status and content
+            print(f"Response Status: {response.status}, Content: {await response.text()}")
+    except aiohttp.ClientError as e:
+        # Handle network or client errors
+        print(f"Error sending data: {e}")
 
 async def get_new_item(session, service, course, item_type, last_check):
     """Fetch new items (announcements, coursework, etc.) for a course and send them if they are new."""
@@ -127,7 +127,7 @@ async def notify_new_activity(service):
     # Update the last check time to the current time
     # appSettings.update("last_check", datetime.now(timezone.utc).isoformat())
 
-    last_check = datetime.fromisoformat("2021-08-01T00:00:00+00:00").replace(tzinfo=timezone.utc)
+    last_check = datetime.fromisoformat("2024-09-24T00:00:00+00:00").replace(tzinfo=timezone.utc)
 
     try:
         # Get all courses from the service
