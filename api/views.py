@@ -2,19 +2,20 @@ import pickle
 import base64
 import traceback
 
+import requests
 from django.http import JsonResponse
-from .classroom_api import notify_new_activity
+from asgiref.sync import async_to_sync
 from googleapiclient.discovery import build
 
-import requests
 from .appSettings import appSettings
+from .classroom_api import notify_new_activity
 
 
 def get(request):
     try:
         try:
             service = build("classroom", "v1", credentials=pickle.loads(base64.b64decode(appSettings.token_pickle_base64)))
-            notify_new_activity(service)
+            async_to_sync(notify_new_activity)(service)
         except:
             r = requests.get(
                 appSettings.utils_server_url + "service/google_auth/",
